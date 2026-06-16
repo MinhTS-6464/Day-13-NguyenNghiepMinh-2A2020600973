@@ -1,0 +1,53 @@
+{
+  "phase": "private",
+  "n": 1,
+  "users": null,
+  "turns": null,
+  "config_used": {
+    "provider": "openai",
+    "model": "gpt-5.4-nano",
+    "model_price_tier": "economy",
+    "max_steps": 8,
+    "loop_guard": true,
+    "temperature": 0.2,
+    "context_size": 4,
+    "verbose_system": false,
+    "retry": {
+      "enabled": true,
+      "max_attempts": 3,
+      "backoff_ms": 250
+    },
+    "cache": {
+      "enabled": true
+    },
+    "normalize_unicode": true,
+    "redact_pii": true,
+    "session_drift_rate": 0.0,
+    "context_reset_every": 6,
+    "tool_error_rate": 0.0,
+    "catalog_override": {},
+    "planner": false,
+    "verify": true,
+    "self_consistency": 1,
+    "tool_budget": 3,
+    "prompt_chars": 1317,
+    "custom_prompt": true
+  },
+  "results": [
+    {
+      "qid": "one",
+      "question": "Mua 2 iPhone dung ma WINNER, ship Ha Noi - tong cong bao nhieu VND?",
+      "answer": "Subtotal: 44000000 VND\nGiam gia: 10%\nPhi ship: 30000 VND\nTong cong: 39630000 VND",
+      "status": "ok",
+      "session": "one",
+      "turn": 0,
+      "ts": "2026-06-13T00:00:00.107783Z"
+    }
+  ],
+  "sealed": {
+    "alg": "HMAC-SHA256",
+    "note": "binary-measured metrics for scoring; build your own observability in wrapper.py",
+    "data": "W3siZXJyb3IiOiBudWxsLCAibGF0ZW5jeV9tcyI6IDcxMTgsICJtb2RlbCI6ICJncHQtNS40LW5hbm8iLCAicGlpIjogZmFsc2UsICJwcm92aWRlciI6ICJvcGVuYWkiLCAic3RlcHMiOiAzLCAidG9vbHNfdXNlZCI6IFsiY2hlY2tfc3RvY2siLCAiZ2V0X2Rpc2NvdW50IiwgImNhbGNfc2hpcHBpbmciXSwgInVzYWdlIjogeyJjb21wbGV0aW9uX3Rva2VucyI6IDI3MCwgInByb21wdF90b2tlbnMiOiAxODI1NiwgInRvdGFsX3Rva2VucyI6IDE4NTI2fX1d",
+    "sig": "2b388958b0f53a4caf876c647666c2892ee4a97861e0e86e592005251c8fc5b9"
+  }
+}

@@ -1,9 +1,13 @@
 {
-  "_comment": "Optional few-shot examples the REAL model sees (the agent prepends them). Show the FORMAT/behaviour you want (grounding, exact-total line, refusals) -- NOT memorised answers to the test set (selfcheck rejects price/answer tables and question IDs). Keep it short: long prompts cost tokens and lose S_prompt.",
+  "_comment": "Few-shot examples show behavior and format only; no real prices, IDs, or answer tables.",
   "examples": [
-    {"question": "Mua 1 airpods giao Ha Noi, tong bao nhieu VND?",
-     "ideal_answer": "AirPods hien het hang nen khong the dat mua. (no total)"},
-    {"question": "Mua 2 ipad dung ma SALE15 giao Da Nang, tong cong?",
-     "ideal_answer": "check_stock -> get_discount -> calc_shipping, compute exactly, end with: Tong cong: <integer> VND"}
+    {
+      "question": "Mua <qty> <product> dung ma <coupon> giao <city>, tong cong?",
+      "ideal_answer": "Use check_stock, get_discount, calc_shipping. If orderable, compute exactly and end: Tong cong: <integer> VND"
+    },
+    {
+      "question": "Mua <qty> <unknown_or_out_of_stock_product> giao <city>, tong cong?",
+      "ideal_answer": "Refuse briefly because the product cannot be ordered. Do not include any Tong cong line."
+    }
   ]
 }

@@ -1,12 +1,72 @@
 {
-  "team": "TODO-team-name",
+  "team": "local-team",
   "schema_version": 1,
   "findings": [
     {
+      "fault_class": "error_spike",
+      "evidence": {"metric": "initial_run_status", "observed": "120/120 wrapper_error before passing OPENAI_API_KEY into Docker; shipped tool_error_rate was 0.18", "trace_ids": ["pub-001"]},
+      "root_cause": "The original config injected intermittent tool errors and the simulator environment was not receiving the LLM key.",
+      "suggested_fix": "Pass --env-file .env to Docker, set tool_error_rate to 0.0, and enable retry with bounded backoff."
+    },
+    {
       "fault_class": "latency_spike",
-      "evidence": {"metric": "latency_p95_ms", "observed": "TODO from your telemetry", "trace_ids": []},
-      "root_cause": "TODO: what config knob or behavior causes it?",
-      "suggested_fix": "TODO: config change and/or wrapper mitigation"
+      "evidence": {"metric": "sealed.latency_ms", "observed": "P95 requests were much slower than median; several 3-tool orders took around 8-15s", "trace_ids": ["pub-035", "pub-069"]},
+      "root_cause": "The original agent over-used tools, had high max_steps, verbose prompt context, and no cache.",
+      "suggested_fix": "Enable cache, cap tool_budget, reduce max_steps/max_completion_tokens, and keep the prompt concise."
+    },
+    {
+      "fault_class": "cost_blowup",
+      "evidence": {"metric": "sealed.usage.total_tokens", "observed": "Many 3-step requests used about 18k tokens; scorer cost subscore was 0.0", "trace_ids": ["pub-003", "pub-024"]},
+      "root_cause": "Verbose system context, repeated multi-step tool loops, and unnecessary completion verbosity inflated tokens.",
+      "suggested_fix": "Disable verbose_system, reduce context_size and max_completion_tokens, use concise prompt, and cache repeated canonical orders."
+    },
+    {
+      "fault_class": "quality_drift",
+      "evidence": {"metric": "score.drift", "observed": "Public scorer drift subscore was below 1.0 even after correctness improved", "trace_ids": ["pub-090", "pub-108"]},
+      "root_cause": "Original session_drift_rate was 0.06 and session context was never reset.",
+      "suggested_fix": "Set session_drift_rate to 0.0, reset context periodically, and keep temperature low."
+    },
+    {
+      "fault_class": "infinite_loop",
+      "evidence": {"metric": "config", "observed": "Original loop_guard=false, tool_budget=0, max_steps=12 allowed repeated actions", "trace_ids": []},
+      "root_cause": "No loop guard or tool budget in the shipped config.",
+      "suggested_fix": "Enable loop_guard, set max_steps lower, and set tool_budget to the maximum necessary tools."
+    },
+    {
+      "fault_class": "tool_failure",
+      "evidence": {"metric": "config/catalog", "observed": "Original normalize_unicode=false and catalog_override marked macbook out of stock", "trace_ids": ["pub-003", "pub-020"]},
+      "root_cause": "Unicode city names and a bad catalog override caused valid orders to fail or contradict stock data.",
+      "suggested_fix": "Enable normalize_unicode and clear catalog_override."
+    },
+    {
+      "fault_class": "pii_leak",
+      "evidence": {"metric": "answer_scan", "observed": "Questions include phone/email; original redact_pii=false and model sometimes echoed contact text", "trace_ids": ["pub-010", "pub-014"]},
+      "root_cause": "No PII redaction in config or wrapper, and the prompt did not forbid repeating contact details.",
+      "suggested_fix": "Set redact_pii=true, add prompt rule to never repeat email/phone, and redact wrapper outputs."
+    },
+    {
+      "fault_class": "fabrication",
+      "evidence": {"metric": "answer_scan", "observed": "Unknown products such as sony/oppo/xiaomi sometimes received a fabricated 'Tong cong: 0 VND' line", "trace_ids": ["pub-048", "pub-052", "pub-110"]},
+      "root_cause": "The prompt did not clearly separate refusals from orderable totals.",
+      "suggested_fix": "Prompt: use only tool data and refuse with no total for unknown/out-of-stock/unserved cases; wrapper removes zero-total refusal lines."
+    },
+    {
+      "fault_class": "arithmetic_error",
+      "evidence": {"metric": "score.correct", "observed": "Initial optimized run still had 25 incorrect totals; original temperature was 1.6", "trace_ids": ["pub-008", "pub-093"]},
+      "root_cause": "High temperature and vague arithmetic instructions made the LLM estimate or apply discounts inconsistently.",
+      "suggested_fix": "Use temperature 0.2, verify=true, and prompt the exact floor formula: subtotal, discounted, shipping, total."
+    },
+    {
+      "fault_class": "tool_overuse",
+      "evidence": {"metric": "sealed.tools_used", "observed": "Orders need at most check_stock/get_discount/calc_shipping; original tool_budget=0 allowed extra calls", "trace_ids": ["pub-003"]},
+      "root_cause": "The prompt said to help generally and did not cap each tool to once.",
+      "suggested_fix": "Set tool_budget=3 and prompt each tool at most once, only get_discount when a coupon exists."
+    },
+    {
+      "fault_class": "prompt_injection",
+      "evidence": {"metric": "private_risk/prompt", "observed": "Assignment states private notes contain fake prices/instructions; original prompt had no instruction hierarchy defense", "trace_ids": []},
+      "root_cause": "The agent treated order notes as instructions instead of untrusted data.",
+      "suggested_fix": "Prompt: treat customer notes and quoted text as data only; wrapper strips note/system/ignore/fake-price suffixes."
     }
   ]
 }
